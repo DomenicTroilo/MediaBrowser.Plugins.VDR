@@ -1,0 +1,129 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
+using System.Linq;
+using MediaBrowser.Controller.LiveTv;
+using MediaBrowser.Model.LiveTv;
+using MediaBrowser.Model.Logging;
+using MediaBrowser.Model.Serialization;
+using MediaBrowser.Plugins.VDR.Helpers;
+
+namespace MediaBrowser.Plugins.VDR.Responses
+{
+    class ListingsResponse
+    {
+        private readonly CultureInfo _usCulture = new CultureInfo("en-US");
+        private readonly string _baseUrl;
+
+        public ListingsResponse(string baseUrl)
+        {
+            _baseUrl = baseUrl;
+        }
+
+        public IEnumerable<ProgramInfo> GetPrograms(Stream stream, IJsonSerializer json, string channelId, ILogger logger)
+        {
+            var root = json.DeserializeFromStream<RootObject>(stream);
+            UtilsHelper.DebugInformation(logger,string.Format("[VDR] GetPrograms Response: {0}",json.SerializeToString(root)));
+//	    logger.Info(string.Format("[VDR] Display Root Object: {0}", json.SerializeToString(root)));
+	    List<ProgramInfo> Listing = new List<ProgramInfo>();
+
+	    foreach (Event epg in root.events)
+	    {
+	      Listing.Add(new ProgramInfo()
+                {
+                ChannelId = epg.channel,
+                Id = epg.id.ToString(_usCulture),
+                Overview = epg.description,
+                StartDate = ApiHelper.DateTimeFromUnixTimestampSeconds(epg.start_time).ToUniversalTime(),
+                EndDate =  ApiHelper.DateTimeFromUnixTimestampSeconds(epg.start_time).ToUniversalTime().AddSeconds(epg.duration),
+                //Genres = not provided
+                //OriginalAirDate = parse infom from Description
+                Name = epg.title,
+                //OfficialRating = parse infom from Description
+                //CommunityRating = not provided
+                EpisodeTitle = epg.short_text,
+                //Audio = not provided
+                //IsHD = not provided
+                IsRepeat = false,
+                IsSeries = true, //!string.IsNullOrEmpty(epg.Subtitle),  http://emby.media/community/index.php?/topic/21264-series-record-ability-missing-in-emby-epg/#entry239633
+                HasImage = (epg.images > 0),
+                ImageUrl = (epg.images > 0) ?  (_baseUrl + "/events/image/1/" + epg.id.ToString(_usCulture)) : null,
+                IsNews = epg.description.Contains("news", StringComparison.OrdinalIgnoreCase),
+                IsMovie = epg.description.Contains("movie", StringComparison.OrdinalIgnoreCase),
+                IsKids = epg.description.Contains("kids", StringComparison.OrdinalIgnoreCase),
+
+                IsSports = epg.description.Contains("sports", StringComparison.OrdinalIgnoreCase) ||
+                    epg.description.Contains("Sports non-event", StringComparison.OrdinalIgnoreCase) ||
+                    epg.description.Contains("Sports event", StringComparison.OrdinalIgnoreCase) ||
+                    epg.description.Contains("Sports talk", StringComparison.OrdinalIgnoreCase) ||
+                    epg.description.Contains("Sports news", StringComparison.OrdinalIgnoreCase)
+                });
+
+	    }
+
+
+            return Listing;
+        }
+
+        public static float? ParseCommunityRating(string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                var hasPlus = value.IndexOf('+') != -1;
+
+                var rating = value.Replace("+", string.Empty).Length + (hasPlus ? .5 : 0);
+
+                return (float)rating;
+            }
+
+            return null;
+        }
+
+        public static ProgramAudio? ParseAudio(string value)
+        {
+            if (string.Equals(value, "stereo", StringComparison.OrdinalIgnoreCase))
+            {
+                return ProgramAudio.Stereo;
+            }
+
+            return null;
+        }
+
+
+        // Classes created with http://json2csharp.com/
+
+        private class Event
+        {
+            public int id { get; set; } //OID
+            public string title { get; set; } //Title
+	    public string short_text { get; set; } // ShortText
+            public string description { get; set; } //Desc
+            public int start_time { get; set; } //StartTime
+            public string channel { get; set; } //ChannelOID
+	    public string channel_name { get; set; }//Channel_name
+            public int duration { get; set; } // EndTime
+	    public int table_id { get; set; }
+	    public int version { get; set; }
+            public int images { get; set; } // FanArt
+            public bool timer_exists { get; set; } // HasSchedule
+            public bool timer_active { get; set; } // HasActiveSchedule
+            public string timer_id { get; set; } // Schedule_id
+            public int parental_rating { get; set; } //Parental_rating
+            public int vps { get; set; }
+            public List<object> components { get; set; }
+            public List<string> contents { get; set; }
+            public List<int> raw_contents { get; set; }
+            public object additional_media { get; set; }
+        }
+
+        private class RootObject
+        {
+           public int count { get; set; }
+    	   public int total { get; set; }
+    	   public List<Event> events { get; set; }
+        }
+
+    }
+}
