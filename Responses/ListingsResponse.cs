@@ -27,37 +27,28 @@ namespace MediaBrowser.Plugins.VDR.Responses
         {
             var root = json.DeserializeFromStream<RootObject>(stream);
             UtilsHelper.DebugInformation(logger,string.Format("[VDR] GetPrograms Response: {0}",json.SerializeToString(root)));
-  	    logger.Info(string.Format("[VDR] Display Root Object: {0}", json.SerializeToString(root)));
+//  	    logger.Info(string.Format("[VDR] Display Root Object: {0}", json.SerializeToString(root)));
 	    if (root != null && root.events != null)
             {
 		return root.events.Select(epg => new ProgramInfo()
                 {
                 ChannelId = channelId,
-                Id = epg.id.ToString(),
-                //Id = "124941420000"
+                Id = epg.channel + epg.id.ToString(),
                 Overview = epg.description,
-                //Overview = Regex.Replace(epg.description,@"\t|\n|\r", ""),
-                //Overview = Regex.Replace(epg.description,@"[^A-Za-z0-9]", " "),
-		//Overview = "Overview",
                 StartDate = ApiHelper.DateTimeFromUnixTimestampSeconds(epg.start_time).ToUniversalTime(),
                 EndDate =  ApiHelper.DateTimeFromUnixTimestampSeconds(epg.start_time).ToUniversalTime().AddSeconds(epg.duration),
                 Genres = new List<string>(),
-                //Genres = new List<string>(new string[] {"sports", "movie"}),
                 OriginalAirDate = null,
                 //OriginalAirDate = parse infom from Description
-                //OriginalAirDate = DateTime.UtcNow,
                 Name = epg.title,
-                //Name = Regex.Replace(epg.title,@"[^A-Za-z0-9]"," "),
-                //Name = "Name",
                 OfficialRating = null,
                 //OfficialRating = parse infom from Description
                 //OfficialRating = "G",
                 //CommunityRating = null, // not provided
                 //CommunityRating = 10,
                 EpisodeTitle = epg.short_text,
-                //EpisodeTitle = "EpisodeTitle",
                 Audio = ParseAudio(epg.description),
-                IsHD = false, // not provided default to false
+                IsHD = epg.description.Contains(" hd ", StringComparison.OrdinalIgnoreCase),
                 IsRepeat = false,
                 IsSeries = epg.description.Contains("series", StringComparison.OrdinalIgnoreCase),
                 HasImage = (epg.images > 0),

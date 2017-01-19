@@ -29,7 +29,7 @@ namespace MediaBrowser.Plugins.VDR
                 }
             };
         }
-	public static readonly string VERSION = "0.4.1";
+	public static readonly string VERSION = "0.4.3";
         /// <summary>
         /// Gets the name of the plugin
         /// </summary>
