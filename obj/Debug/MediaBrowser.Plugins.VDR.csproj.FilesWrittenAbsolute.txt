@@ -1,9 +1,9 @@
 /usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/obj/Debug/.NETFramework,Version=v4.5.AssemblyAttribute.cs
 /usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/obj/Debug/MediaBrowser.Plugins.VDR.Configuration.configPage.html
+/usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/bin/Debug/MediaBrowser.Common.dll
+/usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/bin/Debug/MediaBrowser.Controller.dll
+/usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/bin/Debug/MediaBrowser.Model.dll
 /usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/bin/Debug/MediaBrowser.Plugins.VDR.dll.mdb
 /usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/bin/Debug/MediaBrowser.Plugins.VDR.dll
 /usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/obj/Debug/MediaBrowser.Plugins.VDR.dll
 /usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/obj/Debug/MediaBrowser.Plugins.VDR.dll.mdb
-/usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/bin/Debug/MediaBrowser.Common.dll
-/usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/bin/Debug/MediaBrowser.Controller.dll
-/usr/src/Emby.Plugins/MediaBrowser.Plugins.VDR/bin/Debug/MediaBrowser.Model.dll

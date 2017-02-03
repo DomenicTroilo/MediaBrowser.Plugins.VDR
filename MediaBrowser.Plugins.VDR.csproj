@@ -58,13 +58,12 @@
     </Compile>
     <Compile Include="Responses\CancelRecordingResponse.cs" />
     <Compile Include="Responses\ChannelResponse.cs" />
+    <Compile Include="Responses\InfoResponse.cs" />
     <Compile Include="Configuration\PluginConfiguration.cs" />
     <Compile Include="Helpers\GeneralHelpers.cs" />
     <Compile Include="Helpers\EncryptionHelper.cs" />
     <Compile Include="Helpers\XmlHelper.cs" />
-    <Compile Include="Responses\DetailsServiceResponse.cs" />
     <Compile Include="Responses\InitializeResponse.cs" />
-    <Compile Include="Responses\InstantiateResponse.cs" />
     <Compile Include="Responses\ListingsResponse.cs" />
     <Compile Include="LiveTvService.cs" />
     <Compile Include="Plugin.cs" />
@@ -72,9 +71,7 @@
     <Compile Include="Responses\RecordingResponse.cs" />
     <Compile Include="Responses\TimerDefaultsResponse.cs" />
     <Compile Include="Responses\TimerResponse.cs" />
-    <Compile Include="Responses\TunerResponse.cs" />
     <Compile Include="Responses\VersionCheckResponse.cs" />
-    <Compile Include="Responses\VLCResponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Configuration\configPage.html" />

@@ -48,20 +48,24 @@ namespace MediaBrowser.Plugins.VDR.Responses
                 //CommunityRating = 10,
                 EpisodeTitle = epg.short_text,
                 Audio = ParseAudio(epg.description),
-                IsHD = epg.description.Contains(" hd ", StringComparison.OrdinalIgnoreCase),
+                IsHD = epg.description.ToLower().Contains(" hd ") || epg.channel_name.ToLower().Contains("hd"),
                 IsRepeat = false,
                 IsSeries = epg.description.Contains("series", StringComparison.OrdinalIgnoreCase),
                 HasImage = (epg.images > 0),
                 ImageUrl = (epg.images > 0) ?  (_baseUrl + "/events/image/1/" + epg.id.ToString(_usCulture)) : null,
-                IsNews = epg.description.Contains("news", StringComparison.OrdinalIgnoreCase),
-                IsMovie = epg.description.Contains("movie", StringComparison.OrdinalIgnoreCase),
-                IsKids = epg.description.Contains("kids", StringComparison.OrdinalIgnoreCase),
+                IsNews = epg.description.Contains("news.", StringComparison.OrdinalIgnoreCase) ||
+		    epg.contents.FindAll(str => str.ToLower().Contains("news")).Count > 0,
+                IsMovie = epg.description.Contains("movie.", StringComparison.OrdinalIgnoreCase) ||
+		    epg.contents.FindAll(str => str.ToLower().Contains("movie")).Count > 0,
+		IsKids = epg.description.Contains("children.", StringComparison.OrdinalIgnoreCase) ||
+		    epg.contents.FindAll(str => str.ToLower().Contains("kid")).Count > 0,
 
                 IsSports = epg.description.Contains("sports", StringComparison.OrdinalIgnoreCase) ||
                     epg.description.Contains("Sports non-event", StringComparison.OrdinalIgnoreCase) ||
                     epg.description.Contains("Sports event", StringComparison.OrdinalIgnoreCase) ||
                     epg.description.Contains("Sports talk", StringComparison.OrdinalIgnoreCase) ||
-                    epg.description.Contains("Sports news", StringComparison.OrdinalIgnoreCase)
+                    epg.description.Contains("Sports news", StringComparison.OrdinalIgnoreCase) ||
+		    epg.contents.FindAll(str => str.ToLower().Contains("sport")).Count > 0
                 });
 	      }
 		return new List<ProgramInfo>();

@@ -42,92 +42,6 @@ namespace MediaBrowser.Plugins.VDR
             _logger = logger;
         }
 
-        /// <summary>
-        /// Ensure that we are connected to the VDR server
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        private async Task EnsureConnectionAsync(CancellationToken cancellationToken)
-        {
-            var config = Plugin.Instance.Configuration;
-
-            if (string.IsNullOrEmpty(config.WebServiceUrl))
-            {
-                _logger.Error("[VDR] Web service url must be configured.");
-                throw new InvalidOperationException("VDR web service url must be configured.");
-            }
-
-            if (string.IsNullOrEmpty(config.StreamPort))
-            {
-                _logger.Error("[VDR] StreamPort must be configured.");
-                throw new InvalidOperationException("VDR StreamPort must be configured.");
-            }
-
-            //if (string.IsNullOrEmpty(Sid))
-            //{
-            //    await InitiateSession(cancellationToken).ConfigureAwait(false);
-            //}
-        }
-
-        /// <summary>
-        /// Initiate the VDR session
-        /// </summary>
-        private async Task InitiateSession(CancellationToken cancellationToken)
-        {
-            _logger.Info("[VDR] Start InitiateSession");
-            var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
-
-            var options = new HttpRequestOptions
-            {
-                CancellationToken = cancellationToken,
-                Url = string.Format("{0}/info.json", baseUrl)
-            };
-
-            using (var stream = await _httpClient.Get(options).ConfigureAwait(false))
-            {
-                var clientKeys = new InstantiateResponse().GetClientKeys(stream, _jsonSerializer, _logger);
-
-                var version = clientKeys.version;
-                _logger.Info(string.Format("[VDR] version: {0}", version));
-		//var loggedIn = true;
-                //var loggedIn = await Login(version, cancellationToken).ConfigureAwait(false);
-
-                //if (loggedIn)
-                if (true)
-                {
-                    _logger.Info("[VDR] Session initiated.");
-                    //Version = version;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Initialize the VDR session
-        /// </summary>
-        /// <param name="sid"></param>
-        /// <param name="salt"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        private async Task<bool> Login(string sid, string salt, CancellationToken cancellationToken)
-        {
-            _logger.Info(string.Format("[VDR] Start Login procedure for Sid: {0} & Salt: {1}", sid, salt));
-            var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
-            //var pin = Plugin.Instance.Configuration.Pin;
-            //_logger.Info(string.Format("[VDR] Pin: {0}", pin));
-
-            //var md5Result = EncryptionHelper.GetMd5Hash(strb.Append(":").Append(EncryptionHelper.GetMd5Hash(pin)).Append(":").Append(salt).ToString());
-
-            var options = new HttpRequestOptions
-            {
-                //Url = string.Format("{0}/public/Util/NPVR/Client/Initialize/{1}?sid={2}", baseUrl, md5Result, sid),
-                CancellationToken = cancellationToken
-            };
-
-            using (var stream = await _httpClient.Get(options).ConfigureAwait(false))
-            {
-                return new InitializeResponse().LoggedIn(stream, _jsonSerializer, _logger);
-            }
-        }
 
         /// <summary>
         /// Gets the channels async.
@@ -188,7 +102,6 @@ namespace MediaBrowser.Plugins.VDR
             //_logger.Info(string.Format("[VDR] Start Delete Recording Async for recordingId: {0}", recordingId));
             _logger.Info("[VDR] Start Delete Recording NOT IMPLIMENTED");
             throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
@@ -231,7 +144,6 @@ namespace MediaBrowser.Plugins.VDR
             //_logger.Info(string.Format("[VDR] Start Cancel Recording Async for recordingId: {0}", timerId));
             _logger.Info("[VDR] Start Cancel Recording Async NOT IMPLIMENTED");
             throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
@@ -265,7 +177,6 @@ namespace MediaBrowser.Plugins.VDR
             //_logger.Info(string.Format("[VDR] Start CreateTimer Async for ChannelId: {0} & Name: {1}", info.ChannelId, info.Name));
             _logger.Info("[VDR] Start CreateTimer Async for ChannelId NOT IMPLIMENTED");
             throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
@@ -341,7 +252,6 @@ namespace MediaBrowser.Plugins.VDR
             //_logger.Info("[VDR] Start GetSeriesTimer Async, retrieve the recurring recordings");
             _logger.Info("[VDR] Start GetSeriesTimer Async, retrieve the recurring recordings NOT IMPLIMENTED");
             throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
             var options = new HttpRequestOptions
@@ -388,7 +298,6 @@ namespace MediaBrowser.Plugins.VDR
             //_logger.Info(string.Format("[VDR] Start CreateSeriesTimer Async for ChannelId: {0} & Name: {1}", info.ChannelId, info.Name));
             _logger.Info("[VDR] Start CreateSeriesTimer Async for ChannelId: NOT IMPLIMENTED");
             throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
             var options = new HttpRequestOptions
@@ -471,7 +380,6 @@ namespace MediaBrowser.Plugins.VDR
             //_logger.Info(string.Format("[VDR] Start UpdateSeriesTimer Async for ChannelId: {0} & Name: {1}", info.ChannelId, info.Name));
             _logger.Info("[VDR] Start UpdateSeriesTimer Async for ChannelId: NOT IMPLIMENTED");
             throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
             var options = new HttpRequestOptions
@@ -518,7 +426,6 @@ namespace MediaBrowser.Plugins.VDR
             //_logger.Info(string.Format("[VDR] Start UpdateTimer Async for ChannelId: {0} & Name: {1}", info.ChannelId, info.Name));
             _logger.Info("[VDR] Start UpdateTimer Async for ChannelId: NOT IMPLIMENTED");
             throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
@@ -562,7 +469,6 @@ namespace MediaBrowser.Plugins.VDR
             //_logger.Info(string.Format("[VDR] Start Cancel SeriesRecording Async for recordingId: {0}", timerId));
             _logger.Info("[VDR] Start Cancel SeriesRecording Async for recordingId: NOT IMPLIMENTED");
             throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
@@ -595,7 +501,6 @@ namespace MediaBrowser.Plugins.VDR
             //_logger.Info("[VDR] Start GetDefaultScheduleSettings");
             _logger.Info("[VDR] Start GetDefaultScheduleSettings NOT IMPLIMENTED");
             throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
             var options = new HttpRequestOptions
@@ -743,7 +648,6 @@ namespace MediaBrowser.Plugins.VDR
         public async Task<IEnumerable<ProgramInfo>> GetProgramsAsync(string channelId, DateTime startDateUtc, DateTime endDateUtc, CancellationToken cancellationToken)
         {
             _logger.Info("[VDR] Start GetPrograms Async, retrieve all Programs");
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
             TimeSpan timespan = endDateUtc - startDateUtc;
             var options = new HttpRequestOptions()
@@ -774,13 +678,22 @@ namespace MediaBrowser.Plugins.VDR
         {
             _logger.Info("[VDR LiveTV] GetStatusInfoAsync ...");
 
-            var tunerInfos = new List<LiveTvTunerInfo>();
+        {
+            _logger.Info("[VDR] Start GetStatusInfo Async, retrieve all channels");
 
-            return new LiveTvServiceStatusInfo
+            var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
+
+            var options = new HttpRequestOptions
             {
-                Version = Plugin.VERSION,
-                Tuners = tunerInfos
+                CancellationToken = cancellationToken,
+                Url = string.Format("{0}/info.json", baseUrl)
             };
+
+            using (var stream = await _httpClient.Get(options).ConfigureAwait(false))
+            {
+                return new InfoResponse(Plugin.Instance.Configuration.WebServiceUrl).GetInfo(stream, _jsonSerializer, _logger);
+            }
+        }
 
         }
 
