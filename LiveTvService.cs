@@ -137,7 +137,7 @@ namespace MediaBrowser.Plugins.VDR
         public async Task<IEnumerable<ChannelInfo>> GetChannelsAsync(CancellationToken cancellationToken)
         {
             _logger.Info("[VDR] Start GetChannels Async, retrieve all channels");
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
+            //await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
@@ -161,53 +161,19 @@ namespace MediaBrowser.Plugins.VDR
         public async Task<IEnumerable<RecordingInfo>> GetRecordingsAsync(CancellationToken cancellationToken)
         {
             //_logger.Info("[VDR] Start GetRecordings Async, retrieve all 'Pending', 'Inprogress' and 'Completed' recordings ");
-            _logger.Info("[VDR] Start GetRecordings Async, NOT IMPLIMENTED");
-            throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
             var options = new HttpRequestOptions
             {
                 CancellationToken = cancellationToken,
-                Url = string.Format("{0}/recordings", baseUrl)
+                Url = string.Format("{0}/recordings.json", baseUrl)
             };
 
-            var filterOptions = new
+
+            using (var stream = await _httpClient.Get(options).ConfigureAwait(false))
             {
-                resultLimit = -1,
-                datetimeSortSeq = 0,
-                channelSortSeq = 0,
-                titleSortSeq = 0,
-                statusSortSeq = 0,
-                datetimeDecending = false,
-                channelDecending = false,
-                titleDecending = false,
-                statusDecending = false,
-                All = false,
-                None = false,
-                Pending = false,
-                InProgress = true,
-                Completed = true,
-                Failed = true,
-                Conflict = false,
-                Recurring = false,
-                Deleted = false,
-                FilterByName = false,
-                NameFilter = (string)null,
-                NameFilterCaseSensative = false
-            };
-
-            var postContent = _jsonSerializer.SerializeToString(filterOptions);
-
-            options.RequestContent = postContent;
-            options.RequestContentType = "application/json";
-
-            var response = await _httpClient.Post(options).ConfigureAwait(false);
-
-            using (var stream = response.Content)
-            {
-                return new RecordingResponse(baseUrl).GetRecordings(stream, _jsonSerializer, _logger);
+                return new RecordingResponse(Plugin.Instance.Configuration.WebServiceUrl).GetRecordings(stream, _jsonSerializer, _logger).ToList();
             }
         }
 
@@ -346,54 +312,23 @@ namespace MediaBrowser.Plugins.VDR
         /// <returns></returns>
         public async Task<IEnumerable<TimerInfo>> GetTimersAsync(CancellationToken cancellationToken)
         {
-           // _logger.Info("[VDR] Start GetTimer Async, retrieve the 'Pending' recordings");
-            _logger.Info("[VDR] Start GetTimer Async, retrieve the 'Pending' recordings NOT IMPLIMENTED");
-            throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
+            //_logger.Info("[VDR] Start GetTimers Async, retrieve all 'Pending', 'Inprogress' and 'Completed' recordings ");
+            _logger.Info("[VDR] Start GetTimers Async, NOT IMPLIMENTED");
+
             var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
 
             var options = new HttpRequestOptions
             {
                 CancellationToken = cancellationToken,
-                Url = string.Format("{0}/public/ManageService/Get/SortedFilteredList?sid={1}", baseUrl, Sid)
+                Url = string.Format("{0}/timers.json", baseUrl)
             };
 
-            var filterOptions = new
+
+            using (var stream = await _httpClient.Get(options).ConfigureAwait(false))
             {
-                resultLimit = -1,
-                datetimeSortSeq = 0,
-                channelSortSeq = 0,
-                titleSortSeq = 0,
-                statusSortSeq = 0,
-                datetimeDecending = false,
-                channelDecending = false,
-                titleDecending = false,
-                statusDecending = false,
-                All = false,
-                None = false,
-                Pending = true,
-                InProgress = false,
-                Completed = false,
-                Failed = false,
-                Conflict = true,
-                Recurring = false,
-                Deleted = false,
-                FilterByName = false,
-                NameFilter = (string)null,
-                NameFilterCaseSensative = false
-            };
-
-            var postContent = _jsonSerializer.SerializeToString(filterOptions);
-
-            options.RequestContent = postContent;
-            options.RequestContentType = "application/json";
-
-            var response = await _httpClient.Post(options).ConfigureAwait(false);
-
-            using (var stream = response.Content)
-            {
-                return new RecordingResponse(baseUrl).GetTimers(stream, _jsonSerializer, _logger);
+                return new TimerResponse(Plugin.Instance.Configuration.WebServiceUrl).GetTimers(stream, _jsonSerializer, _logger).ToList();
             }
+
         }
 
         /// <summary>
@@ -438,7 +373,7 @@ namespace MediaBrowser.Plugins.VDR
 
             using (var stream = response.Content)
             {
-                return new RecordingResponse(baseUrl).GetSeriesTimers(stream, _jsonSerializer, _logger);
+                //return new RecordingResponse(baseUrl).GetSeriesTimers(stream, _jsonSerializer, _logger);
             }
         }
 
@@ -726,82 +661,56 @@ namespace MediaBrowser.Plugins.VDR
         public async Task<MediaSourceInfo> GetRecordingStream(string recordingId, string mediaSourceId, CancellationToken cancellationToken)
         {
             //_logger.Info("[VDR] Start GetRecordingStream");
-            _logger.Info("[VDR] Start GetRecordingStream NOT IMPLIMENTED");
-            throw new NotImplementedException();
-            var recordings = await GetRecordingsAsync(cancellationToken).ConfigureAwait(false);
-            var recording = recordings.First(i => string.Equals(i.Id, recordingId, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(recording.Url))
+            var config = Plugin.Instance.Configuration;
+            //var strb = StringBuilder();
+            //strb = Plugin.Instance.Configuration.WebServiceUrl.ToString();
+            var baseUrl = Plugin.Instance.Configuration.WebServiceUrl.Substring(0,Plugin.Instance.Configuration.WebServiceUrl.IndexOf(":", Plugin.Instance.Configuration.WebServiceUrl.IndexOf(":") + 1)) + ":" + Plugin.Instance.Configuration.StreamPort;
+            _liveStreams++;
+	    int recordingNo;
+	    if (int.TryParse(recordingId, out recordingNo))
+	    {
+            string streamUrl = string.Format("{0}/{1}.rec.ts", baseUrl, ++recordingNo);
+            _logger.Info("[VDR] Streaming " + streamUrl);
+            return new MediaSourceInfo
             {
-                _logger.Info("[VDR] RecordingUrl: {0}", recording.Url);
-                return new MediaSourceInfo
-                {
-                    Path = recording.Url,
-                    Protocol = MediaProtocol.Http,
-                    MediaStreams = new List<MediaStream>
+                Id = _liveStreams.ToString(CultureInfo.InvariantCulture),
+                Path = streamUrl,
+                Protocol = MediaProtocol.Http,
+                MediaStreams = new List<MediaStream>
                         {
                             new MediaStream
                             {
                                 Type = MediaStreamType.Video,
-
+                                IsInterlaced = true,
                                 // Set the index to -1 because we don't know the exact index of the video stream within the container
                                 Index = -1,
-
-                                // Set to true if unknown to enable deinterlacing
-                                IsInterlaced = true
                             },
                             new MediaStream
                             {
                                 Type = MediaStreamType.Audio,
+                                IsInterlaced = true,
                                 // Set the index to -1 because we don't know the exact index of the audio stream within the container
-                                Index = -1,
-
-                                // Set to true if unknown to enable deinterlacing
-                                IsInterlaced = true
+                                Index = -1
                             }
-                        }
-                };
-            }
-
-            if (!string.IsNullOrEmpty(recording.Path) && File.Exists(recording.Path))
+                        },
+                // This takes too long
+                SupportsProbing = false
+            };
+	  }
+  	  else
             {
-                _logger.Info("[VDR] RecordingPath: {0}", recording.Path);
-                return new MediaSourceInfo
-                {
-                    Path = recording.Path,
-                    Protocol = MediaProtocol.File,
-                    MediaStreams = new List<MediaStream>
-                        {
-                            new MediaStream
-                            {
-                                Type = MediaStreamType.Video,
-                                // Set the index to -1 because we don't know the exact index of the video stream within the container
-                                Index = -1,
+                _logger.Info("[LiveTV.Vdr] Parsing RecordingID failed, recordingId={0}", recordingId);
+                return null;
+	    }
 
-                                // Set to true if unknown to enable deinterlacing
-                                IsInterlaced = true
-                            },
-                            new MediaStream
-                            {
-                                Type = MediaStreamType.Audio,
-                                // Set the index to -1 because we don't know the exact index of the audio stream within the container
-                                Index = -1,
-
-                                // Set to true if unknown to enable deinterlacing
-                                IsInterlaced = true
-                            }
-                        }
-                };
-            }
-
-            _logger.Error("[VDR] No stream exists for recording {0}", recording);
-            throw new ResourceNotFoundException(string.Format("No stream exists for recording {0}", recording));
         }
 
         public async Task CloseLiveStream(string id, CancellationToken cancellationToken)
         {
             _logger.Info("[VDR] Closing " + id);
             var config = Plugin.Instance.Configuration;
+            _liveStreams--;
+
         }
 
         public async Task CopyFilesAsync(StreamReader source, StreamWriter destination)
@@ -818,21 +727,17 @@ namespace MediaBrowser.Plugins.VDR
         public async Task<SeriesTimerInfo> GetNewTimerDefaultsAsync(CancellationToken cancellationToken, ProgramInfo program = null)
         {
             //_logger.Info("[VDR] Start GetNewTimerDefault Async");
-            _logger.Info("[VDR] Start GetNewTimerDefault Async NOT IMPLIMENTED");
-            throw new NotImplementedException();
-            await EnsureConnectionAsync(cancellationToken).ConfigureAwait(false);
-            var baseUrl = Plugin.Instance.Configuration.WebServiceUrl;
-
-            var options = new HttpRequestOptions()
-            {
-                CancellationToken = cancellationToken,
-                Url = string.Format("{0}/public/ScheduleService/Get/SchedSettingsObj?sid{1}", baseUrl, Sid)
-            };
-
-            using (var stream = await _httpClient.Get(options).ConfigureAwait(false))
-            {
-                return new TimerDefaultsResponse().GetDefaultTimerInfo(stream, _jsonSerializer, _logger);
-            }
+  	     return await Task.Factory.StartNew(() =>               
+             {
+                 return new SeriesTimerInfo
+                 {
+                     PostPaddingSeconds = 120, //TODO: if it can't be extracted via Restful api, move to config or extend restful api
+                     PrePaddingSeconds = 120,
+                     RecordAnyChannel = false, // TODO (clarify): from my understanding: important for series timer (let seriestimer look on any channel for creating timers)
+                     RecordAnyTime = true,
+                     RecordNewOnly = false
+                 };
+             });
         }
 
         public async Task<IEnumerable<ProgramInfo>> GetProgramsAsync(string channelId, DateTime startDateUtc, DateTime endDateUtc, CancellationToken cancellationToken)

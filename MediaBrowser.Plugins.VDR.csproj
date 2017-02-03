@@ -71,6 +71,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Responses\RecordingResponse.cs" />
     <Compile Include="Responses\TimerDefaultsResponse.cs" />
+    <Compile Include="Responses\TimerResponse.cs" />
     <Compile Include="Responses\TunerResponse.cs" />
     <Compile Include="Responses\VersionCheckResponse.cs" />
     <Compile Include="Responses\VLCResponse.cs" />
